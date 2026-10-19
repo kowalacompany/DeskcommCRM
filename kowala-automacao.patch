@@ -1,0 +1,55 @@
+diff --git a/.github/workflows/publish-image.yml b/.github/workflows/publish-image.yml
+index c12f0cd..6375fec 100644
+--- a/.github/workflows/publish-image.yml
++++ b/.github/workflows/publish-image.yml
+@@ -21,7 +21,7 @@ name: Publicar imagem Docker (GHCR)
+ on:
+   push:
+     tags: ["v*"]
+-    branches: ["main"]
++    branches: ["main", "kowala"]
+   # NÃO acrescente `release: types: [published]` aqui. Ele já esteve, e o efeito
+   # foi medido na v1.3.0: `gh release create` empurra a tag E publica a release,
+   # então o MESMO commit foi construído DUAS vezes, com 5 minutos de diferença.
+@@ -965,3 +965,26 @@ jobs:
+             [ "$APP" = "success" ]
+             [ "$FUNDO" = "success" ]
+           fi
++
++  # KOWALA: depois que as imagens da branch `kowala` foram publicadas e o app
++  # subiu no teste, avisa o Easypanel para puxar a imagem nova e reiniciar.
++  # Cada secret e a URL de "Gatilho de implantacao" do servico no Easypanel.
++  # Secret vazio e pulado, para dar para ligar um servico de cada vez.
++  implantar-no-easypanel:
++    needs: [imagens-ok]
++    if: github.event_name == 'push' && github.ref == 'refs/heads/kowala' && needs.imagens-ok.result == 'success'
++    runs-on: ubuntu-latest
++    permissions: {}
++    steps:
++      - name: Implantar app, worker e scheduler
++        env:
++          DEPLOY_APP: ${{ secrets.EASYPANEL_DEPLOY_APP }}
++          DEPLOY_WORKER: ${{ secrets.EASYPANEL_DEPLOY_WORKER }}
++          DEPLOY_SCHEDULER: ${{ secrets.EASYPANEL_DEPLOY_SCHEDULER }}
++        run: |
++          set -u
++          for nome in APP WORKER SCHEDULER; do
++            eval "url=\${DEPLOY_${nome}:-}"
++            if [ -z "$url" ]; then echo "$nome: secret vazio, pulando"; continue; fi
++            if curl -fsS -m 60 "$url" >/dev/null; then echo "$nome: implantacao pedida"; else echo "::error::$nome: o Easypanel recusou o pedido"; exit 1; fi
++          done
+diff --git a/docker/scheduler/entrypoint.sh b/docker/scheduler/entrypoint.sh
+index 2a0eb48..5f6a777 100644
+--- a/docker/scheduler/entrypoint.sh
++++ b/docker/scheduler/entrypoint.sh
+@@ -23,7 +23,9 @@ fi
+ # `SCHEDULER_APP_ORIGIN` que o compose nunca repassava e nenhum template
+ # documentava — controle decorativo, que é pior que controle nenhum: quem o
+ # encontrasse no código o definiria no `.env` e não veria efeito.
+-APP_ORIGIN="http://app:3000"
++# KOWALA: no Easypanel o app se chama ohmyleads_app, nao `app`. Padrao continua
++# http://app:3000; no Easypanel defina APP_ORIGIN=http://ohmyleads_app:3000.
++APP_ORIGIN="${APP_ORIGIN:-http://app:3000}"
+ 
+ # minuto|timeout|caminho — uma linha por cron. O caminho vai COMPLETO de
+ # propósito: o literal `api/v1/cron/<rota>` é o contrato que
