@@ -23,7 +23,9 @@ fi
 # `SCHEDULER_APP_ORIGIN` que o compose nunca repassava e nenhum template
 # documentava — controle decorativo, que é pior que controle nenhum: quem o
 # encontrasse no código o definiria no `.env` e não veria efeito.
-APP_ORIGIN="http://app:3000"
+# KOWALA: no Easypanel o app se chama ohmyleads_app, nao `app`. Padrao continua
+# http://app:3000; no Easypanel defina APP_ORIGIN=http://ohmyleads_app:3000.
+APP_ORIGIN="${APP_ORIGIN:-http://app:3000}"
 
 # minuto|timeout|caminho — uma linha por cron. O caminho vai COMPLETO de
 # propósito: o literal `api/v1/cron/<rota>` é o contrato que

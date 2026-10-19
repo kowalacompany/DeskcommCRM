@@ -21,7 +21,7 @@ name: Publicar imagem Docker (GHCR)
 on:
   push:
     tags: ["v*"]
-    branches: ["main"]
+    branches: ["main", "kowala"]
   # NÃO acrescente `release: types: [published]` aqui. Ele já esteve, e o efeito
   # foi medido na v1.3.0: `gh release create` empurra a tag E publica a release,
   # então o MESMO commit foi construído DUAS vezes, com 5 minutos de diferença.
@@ -965,3 +965,26 @@ jobs:
             [ "$APP" = "success" ]
             [ "$FUNDO" = "success" ]
           fi
+
+  # KOWALA: depois que as imagens da branch `kowala` foram publicadas e o app
+  # subiu no teste, avisa o Easypanel para puxar a imagem nova e reiniciar.
+  # Cada secret e a URL de "Gatilho de implantacao" do servico no Easypanel.
+  # Secret vazio e pulado, para dar para ligar um servico de cada vez.
+  implantar-no-easypanel:
+    needs: [imagens-ok]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/kowala' && needs.imagens-ok.result == 'success'
+    runs-on: ubuntu-latest
+    permissions: {}
+    steps:
+      - name: Implantar app, worker e scheduler
+        env:
+          DEPLOY_APP: ${{ secrets.EASYPANEL_DEPLOY_APP }}
+          DEPLOY_WORKER: ${{ secrets.EASYPANEL_DEPLOY_WORKER }}
+          DEPLOY_SCHEDULER: ${{ secrets.EASYPANEL_DEPLOY_SCHEDULER }}
+        run: |
+          set -u
+          for nome in APP WORKER SCHEDULER; do
+            eval "url=\${DEPLOY_${nome}:-}"
+            if [ -z "$url" ]; then echo "$nome: secret vazio, pulando"; continue; fi
+            if curl -fsS -m 60 "$url" >/dev/null; then echo "$nome: implantacao pedida"; else echo "::error::$nome: o Easypanel recusou o pedido"; exit 1; fi
+          done
