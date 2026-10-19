@@ -5,6 +5,7 @@ const cena = vi.hoisted(() => ({
   usuario: null as { id: string } | null,
 }));
 
+vi.mock("next/font/local", () => ({ default: () => ({ className: "" }) }));
 vi.mock("next/navigation", () => ({
   redirect: vi.fn((destino: string) => {
     throw new Error(`NEXT_REDIRECT:${destino}`);
@@ -36,7 +37,7 @@ describe("/ — a página inicial pública", () => {
     await montar();
 
     expect(screen.getByRole("heading", { level: 1, name: "Marca da Revenda" })).toBeInTheDocument();
-    expect(screen.getByText(/Atendimento e vendas pelo WhatsApp/)).toBeInTheDocument();
+    expect(screen.getAllByText(/Atendimento e vendas pelo WhatsApp/).length).toBeGreaterThan(0);
 
     const politica = screen
       .getAllByRole("link", { name: "Política de Privacidade" })
@@ -46,7 +47,9 @@ describe("/ — a página inicial pública", () => {
       "href",
       "/legal/terms",
     );
-    expect(screen.getByRole("link", { name: "Entrar" })).toHaveAttribute("href", "/login");
+    for (const link of screen.getAllByRole("link", { name: "Entrar" })) {
+      expect(link).toHaveAttribute("href", "/login");
+    }
   });
 
   it("o nome vem da marca resolvida, não de texto fixo", async () => {
