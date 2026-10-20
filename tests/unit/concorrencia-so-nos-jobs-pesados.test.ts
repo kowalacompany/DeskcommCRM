@@ -32,7 +32,7 @@ const PESADOS: Record<string, string[]> = {
 const SEM_GRUPO: Record<string, string[]> = {
   "ci.yml": ["verify", "invariants", "invariants-alcance"],
   "e2e.yml": ["e2e", "e2e-alcance"],
-  "publish-image.yml": ["imagens-ok", "promover-stable", "a-tag-veio-da-main"],
+  "publish-image.yml": ["imagens-ok", "promover-stable", "a-tag-veio-da-main", "implantar-no-easypanel"],
 };
 
 // Todos os jobs declarados de um workflow — o bloco `jobs:`, recortado pela

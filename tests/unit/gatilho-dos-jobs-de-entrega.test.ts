@@ -119,6 +119,15 @@ const GATILHO_ESPERADO: Record<string, { condicao: string | null; efeito: string
   // rastro nenhum: o job vira `skipped`, as três imagens publicam, a tag sai, e
   // o canal simplesmente NÃO ANDA — quem instala pelo default do compose fica na
   // versão anterior sem que nada tenha ficado vermelho.
+  // Deploy do fork Kowala: só a branch `kowala` implanta, e só depois que as
+  // imagens subiram. Desligá-lo deixa o app no ar sem a versão nova.
+  "publish-image.yml::implantar-no-easypanel": {
+    condicao:
+      "github.event_name == 'push' && github.ref == 'refs/heads/kowala' && needs.imagens-ok.result == 'success'",
+    efeito:
+      "Chama os webhooks de deploy do Easypanel (app, worker e scheduler) depois do build. " +
+      "Sem o job, a imagem publica e o painel segue na versão anterior até alguém clicar em Implantar.",
+  },
   "publish-image.yml::promover-stable": {
     condicao:
       "github.event_name == 'push' && github.ref_type == 'tag' && startsWith(github.ref_name, 'v')",
