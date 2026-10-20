@@ -1512,3 +1512,12 @@
     animation-iteration-count: infinite !important;
   }
 }
+
+/* Design WP v1: título de página em negrito e com espaçamento apertado, como no
+   playbook. Fica FORA de `@layer` de propósito: camada nenhuma vence regra sem
+   camada, então vale para os h1 de todas as telas sem editar uma por uma. Só h1;
+   h2 e h3 seguem o que cada componente decide. */
+h1 {
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
