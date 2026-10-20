@@ -9662,6 +9662,12 @@ export const DICIONARIO: Traducoes = {
 
   // ─── Auth: login, cadastro, recuperação de senha, MFA, códigos de recuperação ───
   "Entrar": { es: "Entrar" },
+  "Conversas e funil": { es: "Conversaciones y embudo" },
+  "Clientes e vendas no mesmo lugar": { es: "Clientes y ventas en un solo lugar" },
+  "Agenda de atendimentos": { es: "Agenda de atención" },
+  "Com Google Agenda, se a empresa conectar": { es: "Con Google Calendar, si la empresa lo conecta" },
+  "Passam para uma pessoa quando é preciso": { es: "Pasan a una persona cuando hace falta" },
+  "Atendimento e vendas pelo WhatsApp": { es: "Atención y ventas por WhatsApp" },
   "Criar conta": { es: "Crear cuenta" },
   "Senha": { es: "Contraseña" },
   "Confirmar senha": { es: "Confirmar contraseña" },
